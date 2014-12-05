@@ -43,10 +43,10 @@ class ForvoApi extends BaseApiComponent
 		'apiKey' => '',
 		'action' => 'word-pronunciations',
 		'format' => self::FORMAT_JSON,
-		'language' => 'en',
-		'country' => 'USA',
+		'language' => null,
+		'country' => null,
 		'username' => null,
-		'sex' => self::SEX_MALE,
+		'sex' => null,
 		'minimalRate' => '',
 		'order' => self::ORDER_RATE_DESC,
 		'groupInLanguages' => false,
@@ -56,7 +56,7 @@ class ForvoApi extends BaseApiComponent
 		'cacheDirectory' => '',
 		'apiForvoUrl' => 'http://apifree.forvo.com',
 		'curlTimeout' => 10,
-		'mediaFileFormat' => self::MEDIA_FILE_FORMAT_MP3,
+		'mediaFileFormat' => MediaFile::MEDIA_FILE_FORMAT_MP3,
 	];
 
 	protected $_curl = null;
@@ -100,7 +100,7 @@ class ForvoApi extends BaseApiComponent
 	 *
 	 * @return ForvoApi
 	 */
-	public function param($param, $value)
+	public function set($param, $value)
 	{
 		self::$instance->$param = $value;
 		return self::$instance;
@@ -112,25 +112,37 @@ class ForvoApi extends BaseApiComponent
 	 *
 	 * @return MediaFile[]
 	 */
-	public function getPronounces( $word, $count = null )
+	public function getPronounce( $word )
 	{
+		$this->set('word', $word);
 
+		return $this->_getMediaFiles( $this->_makeRequest() );
 	}
 
 	protected function _makeRequest()
 	{
-		if (!function_exists('curl_version'))
-			throw new Exception('Sorry, but curl extension is not installed');
+		try
+		{
+			if (!function_exists('curl_version'))
+				throw new Exception('Sorry, but curl extension is not installed');
 
-		$this->_curl = curl_init();
+			$this->_curl = curl_init();
 
-		curl_setopt($this->_curl, CURLOPT_URL, $this->_makeUrl());
-		curl_setopt($this->_curl, CURLOPT_TIMEOUT, $this->curlTimeout);
-		curl_setopt($this->_curl, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($this->_curl, CURLOPT_URL, $this->_makeUrl());
+			curl_setopt($this->_curl, CURLOPT_TIMEOUT, $this->curlTimeout);
+			curl_setopt($this->_curl, CURLOPT_RETURNTRANSFER, true);
 
-		$content = curl_exec( $this->_curl );
-		curl_close( $this->_curl );
-		return $content;
+			$content = curl_exec( $this->_curl );
+			return $content;
+		}
+		catch (Exception $e)
+		{
+		    echo $e->getMessage();
+		}
+		finally
+		{
+			curl_close( $this->_curl );
+		}
 	}
 
 	protected function _makeUrl()
@@ -139,15 +151,15 @@ class ForvoApi extends BaseApiComponent
 			. '/key/' . $this->apiKey
 			. '/format/' . $this->format
 			. '/action/' . $this->action
-			. '/word.' . $this->word
-			. '/language/' . $this->language
-			. !empty($this->country) ? '/country/' . $this->country : ''
-			. !empty($this->username) ? '/username/' . $this->username : ''
-			. !empty($this->sex) ? '/sex/' . $this->sex : ''
-			. !empty($this->minimalRate) ? '/rate/' . $this->minimalRate : ''
-			. !empty($this->order) ? '/order/' . $this->order : ''
-			. !empty($this->groupInLanguages) && $this->groupInLanguages === true ? '/group-in-language/' . $this->groupInLanguages : ''
-			. !empty($this->limit) ? '/limit/' . $this->limit : ''
+			. '/word/' . $this->word
+			. (!empty($this->language) ? '/language/' . $this->language : '')
+			. (!empty($this->country) ? '/country/' . $this->country : '')
+			. (!empty($this->username) ? '/username/' . $this->username : '')
+			. (!empty($this->sex) ? '/sex/' . $this->sex : '')
+			. (!empty($this->minimalRate) ? '/rate/' . $this->minimalRate : '')
+			. (!empty($this->order) ? '/order/' . $this->order : '')
+			. (!empty($this->groupInLanguages) && $this->groupInLanguages === true ? '/group-in-language/' . $this->groupInLanguages : '')
+			. (!empty($this->limit) ? '/limit/' . $this->limit : '')
 		;
 
 		return $url;
@@ -158,6 +170,6 @@ class ForvoApi extends BaseApiComponent
 		if (empty($content))
 			throw new Exception('Sorry, but content is empty!');
 
-
+		return MediaFilesFabric::getFiles($content, $this->format);
 	}
 } 
