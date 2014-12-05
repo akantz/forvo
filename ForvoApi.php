@@ -104,7 +104,7 @@ class ForvoApi
 
 	//----------------------------------------------------------------------------------------------------------------------
 
-	static $instance = null;
+	private static $instance = null;
 
 	/**
 	 * @return ForvoApi
@@ -137,5 +137,7 @@ class ForvoApi
 	{
 		return $this->_apiKey;
 	}
+
+
 
 } 
