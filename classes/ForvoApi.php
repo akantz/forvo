@@ -21,8 +21,9 @@
  * @property string $cacheDirectory
  * @property string $apiForvoUrl        Default is http://apifree.forvo.com
  * @property integer $curlTimeout
+ * @property integer $mediaFileFormat   Use class constants
  */
-class ForvoApi
+class ForvoApi extends BaseApiComponent
 {
 	const FORMAT_XML = 'xml';
 	const FORMAT_JSON = 'json';
@@ -49,12 +50,13 @@ class ForvoApi
 		'minimalRate' => '',
 		'order' => self::ORDER_RATE_DESC,
 		'groupInLanguages' => false,
-		'limit' => 2,
+		'limit' => null,
 		'word' => '',
 
 		'cacheDirectory' => '',
 		'apiForvoUrl' => 'http://apifree.forvo.com',
 		'curlTimeout' => 10,
+		'mediaFileFormat' => self::MEDIA_FILE_FORMAT_MP3,
 	];
 
 	protected $_curl = null;
@@ -82,40 +84,35 @@ class ForvoApi
 
 	//----------------------------------------------------------------------------------------------------------------------
 
-	public function __get( $key )
+	/**
+	 * @param $apiKey
+	 * @return ForvoApi
+	 */
+	public function setApiKey($apiKey)
 	{
-		if (array_key_exists($key, $this->_properties))
-			return $this->_properties[$key];
-		else
-			throw new Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
+		$this->apiKey = $apiKey;
+		return self::$instance;
 	}
 
-	public function __set( $key, $value )
+	/**
+	 * @param $param
+	 * @param $value
+	 *
+	 * @return ForvoApi
+	 */
+	public function param($param, $value)
 	{
-		if (array_key_exists($key, $this->_properties))
-			$this->_properties[$key] = $value;
-		else
-			throw new Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
+		self::$instance->$param = $value;
+		return self::$instance;
 	}
 
-	public function __isset( $key )
-	{
-		return isset($this->_properties[$key]);
-	}
-
-	public function __unset( $key )
-	{
-		unset($this->_properties[$key]);
-	}
-
-	public function getProperties()
-	{
-		return $this->_properties;
-	}
-
-	//----------------------------------------------------------------------------------------------------------------------
-
-	public function getPronounces( $word, $count = 2 )
+	/**
+	 * @param mixed $word. If it's string - we check only one word, if array - each word in array
+	 * @param int $count
+	 *
+	 * @return MediaFile[]
+	 */
+	public function getPronounces( $word, $count = null )
 	{
 
 	}
@@ -161,16 +158,6 @@ class ForvoApi
 		if (empty($content))
 			throw new Exception('Sorry, but content is empty!');
 
-		switch ($this->format)
-		{
-			case self::FORMAT_XML:
-				break;
 
-			case self::FORMAT_JSON:
-				break;
-
-			case self::FORMAT_JS_TAG:
-				break;
-		}
 	}
 } 

@@ -1,4 +1,6 @@
-forvo
+Forvo.com
 =====
 
-Forvo API
+Forvo.com API, PHP implementation.
+
+Documentation and component under development :)
