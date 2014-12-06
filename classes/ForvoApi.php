@@ -119,6 +119,16 @@ class ForvoApi extends BaseApiComponent
 		return $this->_getMediaFiles( $this->curlGetContent( $this->_makeUrl(), $this->curlTimeout ) );
 	}
 
+	public function getStandardPronunciation( $word )
+	{
+
+	}
+
+	public function getLanguageList()
+	{
+
+	}
+
 	protected function _makeUrl()
 	{
 		$url = $this->apiForvoUrl

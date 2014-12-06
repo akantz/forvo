@@ -25,6 +25,9 @@ class ForvoApiLoader
 
 	public static function autoload( $className )
 	{
+		if (class_exists($className))
+			return true;
+
 		foreach ( static::$paths as $path )
 		{
 			$classPath = dirname( __FILE__ ) . $path . '/' . $className . '.php';
