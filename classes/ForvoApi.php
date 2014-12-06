@@ -5,7 +5,7 @@
  *
  * @property string $apiKey             Your API key at forvo.com ( you can get one on http://api.forvo.com/documentation/word-pronunciations/ )
  * @property string $action             What to do...
- * @property strint $format             Format, which you want to use for API's answers (Use class constants)
+ * @property string $format             Format, which you want to use for API's answers (Use class constants)
  * @property string $language           Language for results. Default en. If you want to change language, you should get list of available languages, and choice one.
  * @property string $country            To get only the pronunciations recorded by users of this country.
  *                                      You should use the Alpha-3 code.
@@ -21,7 +21,8 @@
  * @property string $cacheDirectory
  * @property string $apiForvoUrl        Default is http://apifree.forvo.com
  * @property integer $curlTimeout
- * @property integer $mediaFileFormat   Use class constants
+ * @property string $mediaFileFormat    Use class constants
+ * @property boolean $download          Return only links to files (false by default behavior)
  */
 class ForvoApi extends BaseApiComponent
 {
@@ -57,9 +58,8 @@ class ForvoApi extends BaseApiComponent
 		'apiForvoUrl' => 'http://apifree.forvo.com',
 		'curlTimeout' => 10,
 		'mediaFileFormat' => MediaFile::MEDIA_FILE_FORMAT_MP3,
+		'download' => false,
 	];
-
-	protected $_curl = null;
 
 	//----------------------------------------------------------------------------------------------------------------------
 
@@ -116,33 +116,7 @@ class ForvoApi extends BaseApiComponent
 	{
 		$this->set('word', $word);
 
-		return $this->_getMediaFiles( $this->_makeRequest() );
-	}
-
-	protected function _makeRequest()
-	{
-		try
-		{
-			if (!function_exists('curl_version'))
-				throw new Exception('Sorry, but curl extension is not installed');
-
-			$this->_curl = curl_init();
-
-			curl_setopt($this->_curl, CURLOPT_URL, $this->_makeUrl());
-			curl_setopt($this->_curl, CURLOPT_TIMEOUT, $this->curlTimeout);
-			curl_setopt($this->_curl, CURLOPT_RETURNTRANSFER, true);
-
-			$content = curl_exec( $this->_curl );
-			return $content;
-		}
-		catch (Exception $e)
-		{
-		    echo $e->getMessage();
-		}
-		finally
-		{
-			curl_close( $this->_curl );
-		}
+		return $this->_getMediaFiles( $this->curlGetContent( $this->_makeUrl(), $this->curlTimeout ) );
 	}
 
 	protected function _makeUrl()
@@ -170,6 +144,6 @@ class ForvoApi extends BaseApiComponent
 		if (empty($content))
 			throw new Exception('Sorry, but content is empty!');
 
-		return MediaFilesFabric::getFiles($content, $this->format);
+		return MediaFilesFabric::getFiles($content, $this->format, $this->download, $this->mediaFileFormat );
 	}
 } 

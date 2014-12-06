@@ -1,12 +1,21 @@
 <?php
 
 /**
+ * When you make request to forvo.com API, you receive JSON or XML data containing many items.
+ * This class allows you use Object-oriented representation of data. Always in the same format.
+ * You just should set "format" in ForvoApi properties, which format you want, and get array of
+ * MediaFile objects.
+ *
+ * Please, remember, if you get data dynamically, the file link (i.e. pathmp3 and pathogg) is valid
+ * only for 2 hours. Cache is not allowed by forvo's terms of use. It's implemented, but only for debugging!
+ *
  * @property string $fileType
  * @property string $filePathMp3
  * @property string $filePathOgg
  * @property boolean $cached
  * @property string $cacheDir
  * @property string $fileUID
+ * @property string $assetsPath
  *
  *
  * @property string $forvoId
@@ -34,6 +43,7 @@ class MediaFile extends BaseApiComponent
 		'filePathOgg' => '',
 		'cached' => false,
 		'cacheDir' => null,
+		'assetsPath' => '',
 
 		'forvoId'           => '',
 		'word'              => '',
@@ -58,39 +68,41 @@ class MediaFile extends BaseApiComponent
 			$word = str_pad($word, 3, '0');
 		}
 
-		$dir = dirname(__FILE__) . '/../assets/tmp/' . $this->fileType . '/' . $word[0] . '/' . $word[1] . '/' . $word[2] . '/' . $this->word . '/';
 		$fileName = $this->rate . '_' . $this->sex . '_' . $this->word . '_' . $this->forvoId . '_' . $this->code . '_' . $this->langname . '_' . $this->country .  '.' . $this->fileType ;
 		$fileName = str_replace(' ', '_', $fileName);
+
+		$this->assetsPath = '/assets/tmp/' . $word[0] . '/' . $word[1] . '/' . $word[2] . '/' . $this->word . '/' . $this->fileType . '/';
+		$dir = dirname(__FILE__) . '/..' . $this->assetsPath;
+
 		$savePath = $dir . $fileName;
 
 		if (!file_exists($dir))
 			mkdir($dir, 0777, true);
 
+		$this->assetsPath .= $fileName;
+
 		switch ($type)
 		{
 			case self::MEDIA_FILE_FORMAT_MP3:
 				$this->_curlDownloadFile( $this->pathmp3, $savePath );
+				$this->filePathMp3 = $savePath;
 				break;
 
 			case self::MEDIA_FILE_FORMAT_OGG:
 				$this->_curlDownloadFile( $this->pathogg, $savePath );
+				$this->filePathOgg = $savePath;
 				break;
 		}
 	}
 
 	protected function _curlDownloadFile( $url, $to )
 	{
-		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, $url);
-		curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		$content = curl_exec( $curl );
+		$content = $this->curlGetContent($url, 10);
 
 		if ($content)
 		{
 			file_put_contents($to, $content);
+			$this->cached = true;
 		}
-
-		curl_close($curl);
 	}
 }

@@ -41,4 +41,33 @@ class BaseApiComponent
 		$this->$key = $value;
 		return $this;
 	}
+
+	public function curlGetContent( $url, $timeout = 10 )
+	{
+		if (!function_exists('curl_version'))
+			throw new Exception('Sorry, but curl extension is not installed');
+
+		$curl = curl_init();
+
+		try
+		{
+			curl_setopt($curl, CURLOPT_URL, $url);
+			curl_setopt($curl, CURLOPT_TIMEOUT, $timeout);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+			$content = curl_exec( $curl );
+			return $content;
+		}
+		catch (Exception $e)
+		{
+		    echo $e->getMessage();
+		}
+		finally
+		{
+			curl_close($curl);
+			unset($curl);
+		}
+
+		return false;
+	}
 } 
