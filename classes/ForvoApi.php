@@ -16,6 +16,9 @@
  * @property boolean $groupInLanguages  Group pronunciations in languages. Default value is "false"
  * @property integer $limit             any integer number. Max. pronunciations returned
  * @property string $word               word to pronounce
+ * @property integer $minPronunciations Min count for pronunciations (for language-list action).
+ * @property integer $pagesize          For methods of word-search.
+ * @property integer $page
  *
  *
  * @property string $cacheDirectory
@@ -52,7 +55,11 @@ class ForvoApi extends BaseApiComponent
 		'order' => self::ORDER_RATE_DESC,
 		'groupInLanguages' => false,
 		'limit' => null,
-		'word' => '',
+		'word' => null,
+		'minPronunciations' => null,
+		'pagesize' => null,
+		'page' => null,
+		'search' => null,
 
 		'cacheDirectory' => '',
 		'apiForvoUrl' => 'http://apifree.forvo.com',
@@ -107,26 +114,79 @@ class ForvoApi extends BaseApiComponent
 	}
 
 	/**
-	 * @param mixed $word. If it's string - we check only one word, if array - each word in array
-	 * @param int $count
+	 * Gets all the pronunciations from a word. If $standartPronunciation is set to true, you will get standart (top-rated) pronunciation of the word.
+	 * default it's false.
+	 *
+	 * @param mixed $word.
 	 *
 	 * @return MediaFile[]
 	 */
-	public function getPronounce( $word )
+	public function getPronunciation( $word, $standartPronunciation = false )
 	{
 		$this->set('word', $word);
+
+		$this->set('action',
+			$standartPronunciation ? 'standard-pronunciation' : 'word-pronunciations'
+		);
 
 		return $this->_getMediaFiles( $this->curlGetContent( $this->_makeUrl(), $this->curlTimeout ) );
 	}
 
-	public function getStandardPronunciation( $word )
+	/**
+	 * Gets languages availables at Forvo. If $popular is set to true, method returns only popular languages. Default it's false.
+	 *
+	 * @param bool $popular
+	 * @return array
+	 * @throws Exception
+	 */
+	public function getLanguageList($popular = false)
 	{
+		$this->set('action',
+			$popular ? 'language-popular' : 'language-list'
+		);
+		$content = $this->curlGetContent( $this->_makeUrl() );
 
+		return ResourceFabric::getLanguagesArray($content, $this->format);
 	}
 
-	public function getLanguageList()
-	{
 
+	/**
+	 * Not for use! Still in development!
+	 *
+	 * @param $pattern
+	 * @return bool|mixed
+	 * @throws Exception
+	 */
+	public function wordSearch($pattern)
+	{
+		$this->set('action', 'words-search')
+			->set('search', $pattern);
+
+		$content = $this->curlGetContent( $this->_makeUrl(), $this->format );
+		return $content; // $this->_getMediaFiles( $content );
+	}
+
+	public function resetToDefault()
+	{
+		$this->set('action', 'word-pronunciations')
+			 ->set('format', self::FORMAT_JSON)
+			 ->set('language', null)
+			 ->set('country', null)
+			 ->set('username', null)
+			 ->set('sex', null)
+			 ->set('minimalRate', '')
+			 ->set('order', self::ORDER_RATE_DESC)
+			 ->set('groupInLanguages', false)
+			 ->set('limit', null)
+			 ->set('word', null)
+			 ->set('mediaFileFormat', MediaFile::MEDIA_FILE_FORMAT_MP3)
+			 ->set('download', false)
+			 ->set('minPronunciations', null)
+			 ->set('pagesize', null)
+			 ->set('page', null)
+			 ->set('search', null);
+
+		return $this;
 	}
 
 	protected function _makeUrl()
@@ -135,7 +195,7 @@ class ForvoApi extends BaseApiComponent
 			. '/key/' . $this->apiKey
 			. '/format/' . $this->format
 			. '/action/' . $this->action
-			. '/word/' . $this->word
+			. (!empty($this->word) ? '/word/' . $this->word : '')
 			. (!empty($this->language) ? '/language/' . $this->language : '')
 			. (!empty($this->country) ? '/country/' . $this->country : '')
 			. (!empty($this->username) ? '/username/' . $this->username : '')
@@ -144,6 +204,10 @@ class ForvoApi extends BaseApiComponent
 			. (!empty($this->order) ? '/order/' . $this->order : '')
 			. (!empty($this->groupInLanguages) && $this->groupInLanguages === true ? '/group-in-language/' . $this->groupInLanguages : '')
 			. (!empty($this->limit) ? '/limit/' . $this->limit : '')
+			. (!empty($this->minPronunciations) ? '/min-pronunciations/' . $this->minPronunciations : '')
+			. (!empty($this->pagesize) ? '/pagesize/' . $this->pagesize : '')
+			. (!empty($this->page) ? '/page/' . $this->page : '')
+			. (!empty($this->search) ? '/search/' . $this->search : '')
 		;
 
 		return $url;
@@ -154,6 +218,6 @@ class ForvoApi extends BaseApiComponent
 		if (empty($content))
 			throw new Exception('Sorry, but content is empty!');
 
-		return MediaFilesFabric::getFiles($content, $this->format, $this->download, $this->mediaFileFormat );
+		return ResourceFabric::getFiles($content, $this->format, $this->download, $this->mediaFileFormat );
 	}
 } 

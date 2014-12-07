@@ -1,10 +1,64 @@
 <?php
 
 
-class MediaFilesFabric
+class ResourceFabric
 {
 	protected static $download;
 	protected static $downloadFormat;
+
+	public static function getLanguagesArray($data, $format)
+	{
+		switch ($format)
+		{
+			case \ForvoApi::FORMAT_JSON:
+				try
+				{
+				    $languages = [];
+					$json = json_decode($data, true);
+
+					if (isset($json['items']) && count($json['items']) > 0)
+					{
+						foreach ($json['items'] as $item)
+						{
+							$languages[ $item['code'] ] = $item['en'];
+						}
+					}
+
+					unset($json);
+					return $languages;
+				}
+				catch (Exception $e)
+				{
+					echo $e->getMessage();
+				}
+				break;
+
+			case \ForvoApi::FORMAT_XML:
+				try
+				{
+					$languages = [];
+					$simpleXmlObject = new SimpleXMLElement($data);
+
+					if (count($simpleXmlObject->item) > 0)
+					{
+						foreach ( $simpleXmlObject->item as $item )
+						{
+							$languages[ (string) $item->code ] = (string) $item->en;
+						}
+					}
+
+					unset($simpleXmlObject);
+					return $languages;
+				}
+				catch (Exception $e)
+				{
+				    echo $e->getMessage();
+				}
+				break;
+		}
+
+		return [];
+	}
 
 	public static function getFiles( $data, $format, $download, $downloadFormat )
 	{

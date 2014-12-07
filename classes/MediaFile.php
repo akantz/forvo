@@ -7,7 +7,7 @@
  * MediaFile objects.
  *
  * Please, remember, if you get data dynamically, the file link (i.e. pathmp3 and pathogg) is valid
- * only for 2 hours. Cache is not allowed by forvo's terms of use. It's implemented, but only for debugging!
+ * only for 2 hours. Cache is not allowed by forvo's terms of use. It was implemented, but only for debugging!
  *
  * @property string $fileType
  * @property string $filePathMp3

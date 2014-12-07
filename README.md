@@ -1,14 +1,10 @@
-Forvo.com API, PHP implementation.
-=====
+# Forvo.com API, PHP implementation. #
 
-Firstly, you need your own Forvo.com API key. You can get one free there: 
-
-http://api.forvo.com/documentation/word-pronunciations/
+Firstly, you need your own Forvo.com API key. You can get one free there: http://api.forvo.com/documentation/word-pronunciations/
 
 Please, read also forvo's terms of use.
 
-Example of usage
-===========
+## Example of usage ##
 
 ```php
 require_once( dirname(__FILE__) . '/../ForvoApiLoader.php' );
@@ -24,11 +20,11 @@ $forvoApi = ForvoApiLoader::getApi();
 // Fill api key (get one on forvo.com
 $forvoApi->apiKey = '<your forvo.com api key>';
 // get media files array (audio in selected format, mp3 is default)
-$files = $forvoApi->getPronounce('cat', 1);
+$files = $forvoApi->getPronunciation('cat', 1);
 
 // Or even more simple...
 
-$files = ForvoApiLoader::getApi()->setApiKey('<your api key>')->getPronounce('cat');
+$files = ForvoApiLoader::getApi()->setApiKey('<your api key>')->getPronunciation('cat');
 
 // if you need set some params, use param($name, $value) method:
 
@@ -37,7 +33,7 @@ $files = ForvoApiLoader::getApi()->setApiKey('<your api key>')
 	->set('language', 'en')
 	->set('limit', 5)
 	->set('format', \ForvoApi::FORMAT_XML)
-	->getPronounce('radioactivity');
+	->getPronunciation('radioactivity');
 
 var_dump($files);
 
