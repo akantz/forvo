@@ -1,5 +1,6 @@
 <?php
 
+namespace forvoapi\classes;
 
 class ResourceFabric
 {
@@ -10,7 +11,7 @@ class ResourceFabric
 	{
 		switch ($format)
 		{
-			case \ForvoApi::FORMAT_JSON:
+			case ForvoApi::FORMAT_JSON:
 				try
 				{
 				    $languages = [];
@@ -27,17 +28,17 @@ class ResourceFabric
 					unset($json);
 					return $languages;
 				}
-				catch (Exception $e)
+				catch (\Exception $e)
 				{
 					echo $e->getMessage();
 				}
 				break;
 
-			case \ForvoApi::FORMAT_XML:
+			case ForvoApi::FORMAT_XML:
 				try
 				{
 					$languages = [];
-					$simpleXmlObject = new SimpleXMLElement($data);
+					$simpleXmlObject = new \SimpleXMLElement($data);
 
 					if (count($simpleXmlObject->item) > 0)
 					{
@@ -50,7 +51,7 @@ class ResourceFabric
 					unset($simpleXmlObject);
 					return $languages;
 				}
-				catch (Exception $e)
+				catch (\Exception $e)
 				{
 				    echo $e->getMessage();
 				}
@@ -67,15 +68,15 @@ class ResourceFabric
 
 		switch ($format)
 		{
-			case \ForvoApi::FORMAT_XML:
+			case ForvoApi::FORMAT_XML:
 				return self::_getFiles_FormatXml($data);
 				break;
 
-			case \ForvoApi::FORMAT_JSON:
+			case ForvoApi::FORMAT_JSON:
 				return self::_getFiles_FormatJson($data);
 				break;
 
-			case \ForvoApi::FORMAT_JS_TAG:
+			case ForvoApi::FORMAT_JS_TAG:
 				return $data;
 				break;
 		}
@@ -91,7 +92,7 @@ class ResourceFabric
 		try
 		{
 		    $files = [];
-			$simpleXmlObject = new SimpleXMLElement($data);
+			$simpleXmlObject = new \SimpleXMLElement($data);
 
 			if (count($simpleXmlObject->item) > 0)
 			{
@@ -120,7 +121,7 @@ class ResourceFabric
 			unset($simpleXmlObject);
 			return $files;
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			echo $e->getMessage();
 			return [];
@@ -161,7 +162,7 @@ class ResourceFabric
 			unset($json);
 			return $files;
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			echo $e->getMessage();
 			return [];

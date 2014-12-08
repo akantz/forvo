@@ -1,5 +1,7 @@
 <?php
 
+namespace forvoapi\classes;
+
 /**
  * When you make request to forvo.com API, you receive JSON or XML data containing many items.
  * This class allows you use Object-oriented representation of data. Always in the same format.

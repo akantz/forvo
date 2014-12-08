@@ -1,5 +1,9 @@
 <?php
 
+namespace forvoapi\classes;
+
+use forvoapi\classes\BaseApiComponent;
+
 /**
  * Class ForvoApi
  *
@@ -137,7 +141,7 @@ class ForvoApi extends BaseApiComponent
 	 *
 	 * @param bool $popular
 	 * @return array
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function getLanguageList($popular = false)
 	{
@@ -155,7 +159,7 @@ class ForvoApi extends BaseApiComponent
 	 *
 	 * @param $pattern
 	 * @return bool|mixed
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function wordSearch($pattern)
 	{
@@ -163,7 +167,7 @@ class ForvoApi extends BaseApiComponent
 			->set('search', $pattern);
 
 		$content = $this->curlGetContent( $this->_makeUrl(), $this->format );
-		return $content; // $this->_getMediaFiles( $content );
+		return $content;
 	}
 
 	public function resetToDefault()
@@ -216,7 +220,7 @@ class ForvoApi extends BaseApiComponent
 	protected function _getMediaFiles( $content )
 	{
 		if (empty($content))
-			throw new Exception('Sorry, but content is empty!');
+			throw new \Exception('Sorry, but content is empty!');
 
 		return ResourceFabric::getFiles($content, $this->format, $this->download, $this->mediaFileFormat );
 	}

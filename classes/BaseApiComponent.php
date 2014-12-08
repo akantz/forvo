@@ -1,5 +1,7 @@
 <?php
 
+namespace forvoapi\classes;
+
 class BaseApiComponent
 {
 	protected $_properties = [];
@@ -10,7 +12,7 @@ class BaseApiComponent
 		if (array_key_exists($key, $this->_properties))
 			return $this->_properties[$key];
 		else
-			throw new Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
+			throw new \Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
 	}
 
 	public function __set( $key, $value )
@@ -18,7 +20,7 @@ class BaseApiComponent
 		if (array_key_exists($key, $this->_properties))
 			$this->_properties[$key] = $value;
 		else
-			throw new Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
+			throw new \Exception('The property ' . $key . ' is not exists in class ' . __CLASS__);
 	}
 
 	public function __isset( $key )
@@ -45,7 +47,7 @@ class BaseApiComponent
 	public function curlGetContent( $url, $timeout = 10 )
 	{
 		if (!function_exists('curl_version'))
-			throw new Exception('Sorry, but curl extension is not installed');
+			throw new \Exception('Sorry, but curl extension is not installed');
 
 		$curl = curl_init();
 
@@ -58,7 +60,7 @@ class BaseApiComponent
 			$content = curl_exec( $curl );
 			return $content;
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 		    echo $e->getMessage();
 		}
