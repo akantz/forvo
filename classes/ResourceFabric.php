@@ -61,6 +61,54 @@ class ResourceFabric
 		return [];
 	}
 
+	public static function getWordSearch($data, $format)
+	{
+		switch ($format)
+		{
+			case ForvoApi::FORMAT_XML:
+				$return = [];
+				$simpleXmlObject = new \SimpleXMLElement($data);
+
+				if (count($simpleXmlObject->item) > 0)
+				{
+					foreach ( $simpleXmlObject->item as $item )
+					{
+						if (isset($item->standard_pronunciation))
+						{
+							$item->standard_pronunciation->word = $item->word;
+							$return[ (int) $item->id ] = self::_makeMediaFile( $item->standard_pronunciation, 'xml' );
+						}
+					}
+				}
+				return $return;
+
+				break;
+
+			case ForvoApi::FORMAT_JSON:
+				$return = [];
+				$json = json_decode( $data, true );
+
+				if (count($json['items']) > 0)
+				{
+					foreach ( $json['items'] as $item )
+					{
+						if (isset($item['standard_pronunciation']))
+						{
+							$item['standard_pronunciation']['word'] = $item['word'];
+							$return[ (int) $item['id'] ] = self::_makeMediaFile( $item['standard_pronunciation'], 'json' );
+						}
+					}
+				}
+
+				return $return;
+				break;
+
+			case ForvoApi::FORMAT_JS_TAG:
+				return $data;
+				break;
+		}
+	}
+
 	public static function getFiles( $data, $format, $download, $downloadFormat )
 	{
 		self::$download = $download;
@@ -98,22 +146,7 @@ class ResourceFabric
 			{
 				foreach ( $simpleXmlObject->item as $item )
 				{
-					$mediaFile = new MediaFile();
-					$mediaFile->forvoId     = (int) $item->id ;
-					$mediaFile->word        = (string) $item->word;
-					$mediaFile->addtime     = (string) $item->addtime;
-					$mediaFile->username    = (string) $item->username;
-					$mediaFile->sex         = (string) $item->sex;
-					$mediaFile->country     = (string) $item->country;
-					$mediaFile->code        = (string) $item->code;
-					$mediaFile->langname    = (string) $item->langname;
-					$mediaFile->pathmp3     = (string) $item->pathmp3;
-					$mediaFile->pathogg     = (string) $item->pathogg;
-					$mediaFile->rate        = (string) $item->rate;
-
-					if (self::$download)
-						$mediaFile->downloadFile( self::$downloadFormat );
-
+					$mediaFile = self::_makeMediaFile( $item, 'xml' );
 					$files[] = $mediaFile;
 				}
 			}
@@ -139,22 +172,7 @@ class ResourceFabric
 			{
 				foreach ($json['items'] as $item)
 				{
-					$mediaFile = new MediaFile();
-					$mediaFile->forvoId     = $item['id'];
-					$mediaFile->word        = $item['word'];
-					$mediaFile->addtime     = $item['addtime'];
-					$mediaFile->username    = $item['username'];
-					$mediaFile->sex         = $item['sex'];
-					$mediaFile->country     = $item['country'];
-					$mediaFile->code        = $item['code'];
-					$mediaFile->langname    = $item['langname'];
-					$mediaFile->pathmp3     = $item['pathmp3'];
-					$mediaFile->pathogg     = $item['pathogg'];
-					$mediaFile->rate        = $item['rate'];
-
-					if (self::$download)
-						$mediaFile->downloadFile( self::$downloadFormat );
-
+					$mediaFile = self::_makeMediaFile( $item, 'json' );
 					$files[] = $mediaFile;
 				}
 			}
@@ -167,5 +185,34 @@ class ResourceFabric
 			echo $e->getMessage();
 			return [];
 		}
+	}
+
+	/**
+	 * Get MediaFile object from xml or json item source
+	 *
+	 * @param $item
+	 * @param string $format
+	 * @return MediaFile
+	 */
+	protected static function _makeMediaFile( $item, $format = 'json' )
+	{
+		$format = strtolower($format);
+		$mediaFile = new MediaFile();
+		$mediaFile->forvoId     = ($format == 'json') ? $item['id']         : (int)$item->id;
+		$mediaFile->word        = ($format == 'json') ? $item['word']       : (string)$item->word;
+		$mediaFile->addtime     = ($format == 'json') ? $item['addtime']    : (string)$item->addtime;
+		$mediaFile->username    = ($format == 'json') ? $item['username']   : (string)$item->username;
+		$mediaFile->sex         = ($format == 'json') ? $item['sex']        : (string)$item->sex;
+		$mediaFile->country     = ($format == 'json') ? $item['country']    : (string)$item->country;
+		$mediaFile->code        = ($format == 'json') ? $item['code']       : (string)$item->code;
+		$mediaFile->langname    = ($format == 'json') ? $item['langname']   : (string)$item->langname;
+		$mediaFile->pathmp3     = ($format == 'json') ? $item['pathmp3']    : (string)$item->pathmp3;
+		$mediaFile->pathogg     = ($format == 'json') ? $item['pathogg']    : (string)$item->pathogg;
+		$mediaFile->rate        = ($format == 'json') ? $item['rate']       : (int)$item->rate;
+
+		if (self::$download)
+			$mediaFile->downloadFile( self::$downloadFormat );
+
+		return $mediaFile;
 	}
 }

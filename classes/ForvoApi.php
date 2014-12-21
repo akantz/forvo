@@ -167,7 +167,7 @@ class ForvoApi extends BaseApiComponent
 			->set('search', $pattern);
 
 		$content = $this->curlGetContent( $this->_makeUrl(), $this->format );
-		return $content;
+		return ResourceFabric::getWordSearch($content, $this->format);
 	}
 
 	public function resetToDefault()
